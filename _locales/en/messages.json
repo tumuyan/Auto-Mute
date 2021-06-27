@@ -1,0 +1,16 @@
+{
+    "autoMute": {
+        "message": "Auto mute background tabs"
+    },
+    "allMute": {
+        "message": "Mute all the opened tabs"
+    },   "unMute": {
+        "message": "UnMute all the opened tabs"
+    },
+    "name": {
+        "message": "Auto Mute"
+    },
+    "aboutText": {
+        "message": "This extension can mute background tabs automatically and unmute them automatically when the page is switched to the foreground."
+    }
+}

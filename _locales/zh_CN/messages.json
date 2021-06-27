@@ -1,0 +1,17 @@
+{
+    "autoMute": {
+        "message": "自动静音后台页"
+    },
+    "allMute": {
+        "message": "静音全部标签页"
+    },
+    "unMute": {
+        "message": "恢复全部标签页"
+    },
+    "name": {
+        "message": "Auto Mute - 自动静音后台标签页"
+    },
+    "aboutText": {
+        "message": "此扩展能够把后台标签页自动静音，当页面切换到前台时自动取消静音。"
+    }
+}

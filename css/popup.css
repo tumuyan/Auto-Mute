@@ -1,0 +1,58 @@
+body {
+    background: url('../images/bg.gif') repeat-y left #fff;
+    margin: 4px;
+    font-size: medium;
+    text-align: center;
+    width: 250px;
+}
+
+.setting {
+    box-shadow: 0px 0px 0px 2px #9fb4f2;
+    background: linear-gradient(to bottom, #7892c2 5%, #476e9e 100%);
+    background-color: #7892c2;
+    border-radius: 10px;
+    border: 1px solid #4e6096;
+    display: block;
+    /* white-space:nowrap; */
+    cursor: pointer;
+    color: #ffffff;
+    /* font-size:medium; */
+    padding: 8px 12px;
+    /* width:80%; */
+    text-decoration: none;
+    text-shadow: 0px 1px 0px #283966;
+    margin: 6%;
+    min-width: 160px;
+}
+
+.setting:hover {
+    background: linear-gradient(to bottom, #476e9e 5%, #7892c2 100%);
+    background-color: #476e9e;
+}
+
+.setting:active {
+    position: relative;
+    top: 1px;
+}
+
+div[sw="off"] {
+    box-shadow: 0px 0px 0px 2px #f2fadc;
+    background: linear-gradient(to bottom, #dbe6c4 5%, #9ba892 100%);
+    background-color: #dbe6c4;
+    border: 1px solid #b2b8ad;
+    color: #757d6f;
+    text-shadow: 0px 1px 0px #ced9bf;
+}
+
+div[sw="off"]:hover {
+    background: linear-gradient(to bottom, #9ba892 5%, #dbe6c4 100%);
+    background-color: #9ba892;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: none;
+        background-color: rgb(74, 74, 74);
+        color: #fafafa;
+    }
+}
