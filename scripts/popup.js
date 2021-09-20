@@ -1,6 +1,11 @@
 var sw_on =true;
-if(localStorage['sw_on']=="false")
+if(localStorage['sw_on']=='false')
 sw_on=false ;
+
+var sw_audible = true;
+if(localStorage['audible']=='false')
+sw_audible=false;
+
 document.addEventListener('DOMContentLoaded', function () {
 
     var auto = document.getElementById('auto');
@@ -12,10 +17,19 @@ document.addEventListener('DOMContentLoaded', function () {
     var unmute = document.getElementById('unmute');
     unmute.textContent = chrome.i18n.getMessage("unMute");
 
+    var audible = document.getElementById('audible');
+    audible.textContent = chrome.i18n.getMessage("audible");
+
     if (sw_on){
         auto.setAttribute("sw", "on");
     }  else {
         auto.setAttribute("sw", "off");
+    }
+
+    if (sw_audible){
+        audible.setAttribute('sw',"on");
+    }else{
+        audible.setAttribute("sw","off");
     }
 
     auto.onclick = function () {
@@ -31,6 +45,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         console.log('auto');
     }
+
+
+    audible.onclick = function(){
+        sw_audible = !sw_audible;
+
+        var bg=chrome.extension.getBackgroundPage();
+        bg.sw2(sw_audible);
+
+        if (sw_audible){
+            audible.setAttribute('sw',"on");
+        }else{
+            audible.setAttribute("sw","off");
+        }   
+    }
+
     mute.onclick = function () {
         console.log('mute');
         muteAll(true);

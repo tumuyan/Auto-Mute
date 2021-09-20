@@ -12,5 +12,8 @@
     },
     "aboutText": {
         "message": "This extension can mute background tabs automatically and unmute them automatically when the page is switched to the foreground."
+    },
+    "audible": {
+        "message": "Skip no audio tabs"
     }
 }

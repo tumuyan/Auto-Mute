@@ -9,12 +9,16 @@
 
 已经上传Edge商店 https://microsoftedge.microsoft.com/addons/detail/ahnjeefliifcofmjceffghigncgoigmj
 
-![img](./screen.gif)
 
-UI非常简单,一共3个按钮:
+UI非常简单,一共4个按钮:
 1. 是否自动静音后台页面
-2. 一键静音当前打开的全部页面(只生效一次)
-3. 一键恢复当前打开的全部页面(只生效一次)  
+2. 是否跳过不发音的标签页
+3. 一键静音当前打开的全部页面(只生效一次)
+4. 一键恢复当前打开的全部页面(只生效一次)  
+
 ![img](./screen.png)
+
+
+![img](./screen.gif)
 
 图标来自[iconfont](https://www.iconfont.cn/), 按钮样式来自[CSS Button Generator](https://www.bestcssbuttongenerator.com/#/1)
