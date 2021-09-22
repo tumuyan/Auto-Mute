@@ -1,4 +1,5 @@
 var tabNow = -1;
+var tabActive = -1;
 var sw_on = true;
 
 if (localStorage['sw_on'] == 'false')
@@ -11,6 +12,7 @@ if (localStorage['audible'] == 'false')
 sw2(sw_audible);
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
+    tabActive = activeInfo.tabId;
     console.log("onSelectionChanged: tabid-> " +  activeInfo.tabId + " sw_on="+sw_on);   
     if (!sw_on)
         return;
@@ -22,6 +24,7 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
             let muted = tab.active?false:true;
             await chrome.tabs.update(tabId, { muted });
 
+            // 不智能跳过，或者智能跳过但是这个页面发音
             if(!sw_audible || tab.audible){
                 if(tabNow != tabId){
                     await chrome.tabs.update(tabNow, { muted:true} );
@@ -35,6 +38,16 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
         console.log("Error-Mute-Tab-" + tabNow + "\n" + e);
     }
 
+});
+
+
+// 如果智能跳过，需要检查前台标签内容更新时自动发声
+chrome.tabs.onUpdated.addListener(function (id, info, tab) {
+    if(sw_audible && id == tabActive && id!=tabNow && tab.audible){
+        chrome.tabs.update(id, { muted:false });
+        chrome.tabs.update(tabNow, { muted:true} );
+        tabNow = tabActive;
+    }
 });
 
 function sw(sw) {
