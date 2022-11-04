@@ -15,5 +15,11 @@
     },
     "audible": {
         "message": "Skip no audio tabs"
+    },
+    "muteactive": {
+        "message": "Mute this tab"
+    },
+    "unmuteactive": {
+        "message": "UnMute this tab"
     }
 }

@@ -16,5 +16,11 @@
     },
     "audible": {
         "message": "跳过不发音标签"
+    },
+    "muteactive": {
+        "message": "静音当前标签页"
+    },
+    "unmuteactive": {
+        "message": "恢复当前标签页"
     }
 }

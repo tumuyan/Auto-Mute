@@ -10,11 +10,13 @@
 已经上传Edge商店 https://microsoftedge.microsoft.com/addons/detail/ahnjeefliifcofmjceffghigncgoigmj
 
 
-UI非常简单,一共4个按钮:
+UI非常简单,一共5个按钮:
 1. 是否自动静音后台页面
 2. 是否跳过不发音的标签页
 3. 一键静音当前打开的全部页面(只生效一次)
 4. 一键恢复当前打开的全部页面(只生效一次)  
+5. 静音/解除静音当前标签页面
+
 
 ![img](./screen.png)
 

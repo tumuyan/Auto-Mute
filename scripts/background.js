@@ -13,7 +13,7 @@ sw2(sw_audible);
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
     tabActive = activeInfo.tabId;
-    console.log("onSelectionChanged: tabid-> " +  activeInfo.tabId + " sw_on="+sw_on);   
+    console.log("onSelectionChanged: tabid-> " + activeInfo.tabId + " sw_on=" + sw_on);
     if (!sw_on)
         return;
 
@@ -21,18 +21,18 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
         let tabId = activeInfo.tabId;
         chrome.tabs.get(tabId, async (tab) => {
 
-            let muted = tab.active?false:true;
-            await chrome.tabs.update(tabId, { muted });
+            let muted = tab.active ? false : true;
+            await chrome.tabs.update(tabId, { muted: muted });
 
             // 不智能跳过，或者智能跳过但是这个页面发音
-            if(!sw_audible || tab.audible){
-                if(tabNow != tabId){
-                    await chrome.tabs.update(tabNow, { muted:true} );
+            if (!sw_audible || tab.audible) {
+                if (tabNow != tabId) {
+                    await chrome.tabs.update(tabNow, { muted: true });
                     tabNow = tabId;
                 }
             }
-            console.log(`Tab ${tab.id} is ${muted ? 'muted' : 'unmuted' }  audiable=${tab.audible}`);
-          });
+            console.log(`Tab ${tab.id} is ${muted ? 'muted' : 'unmuted'}  audiable=${tab.audible}`);
+        });
 
     } catch (e) {
         console.log("Error-Mute-Tab-" + tabNow + "\n" + e);
@@ -43,9 +43,9 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
 
 // 如果智能跳过，需要检查前台标签内容更新时自动发声
 chrome.tabs.onUpdated.addListener(function (id, info, tab) {
-    if(sw_audible && id == tabActive && id!=tabNow && tab.audible){
-        chrome.tabs.update(id, { muted:false });
-        chrome.tabs.update(tabNow, { muted:true} );
+    if (sw_audible && id == tabActive && id != tabNow && tab.audible) {
+        chrome.tabs.update(id, { muted: false });
+        chrome.tabs.update(tabNow, { muted: true });
         tabNow = tabActive;
     }
 });
@@ -77,7 +77,6 @@ function sw2(sw) {
         });
     }
 }
-
 
 function muteAll(mute) {
     chrome.windows.getAll({ populate: true }, function (windows) {
