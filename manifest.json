@@ -2,16 +2,18 @@
   "name": "__MSG_name__",
   "short_name": "Auto Mute",
   "author": "Tumuyan",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "update_url": "https://edge.microsoft.com/extensionwebstorebase/v1/crx",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "minimum_chrome_version": "22.0",
   "default_locale": "en",
   "description": "__MSG_aboutText__",
   "background": {
-    "page": "background.html"
+    "service_worker": "scripts/background.js",
+    "type": "module"
   },
   "permissions": [
+    "storage",
     "tabs",
     "contextMenus"
   ],
@@ -21,7 +23,7 @@
     "48": "images/logo-48.png",
     "128": "images/logo-128.png"
   },
-  "browser_action": {
+  "action": {
    "default_icon": {
      "19": "images/logo-19.png",
      "38": "images/logo-38.png",
