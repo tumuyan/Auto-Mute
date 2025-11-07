@@ -82,14 +82,14 @@ document.addEventListener('DOMContentLoaded', function () {
         chrome.storage.local.set(options, function () { });
     }
 
-    btnMute.onclick = function () {
+    btnMute.onclick = async function () {
         console.log('mute');
-        muteAll(true);
+        await muteAll(true);
     }
 
-    btnUnMute.onclick = function () {
+    btnUnMute.onclick = async function () {
         console.log('unute');
-        muteAll(false);
+        await muteAll(false);
 
         options.autoMute = false;
         btnAuto.setAttribute("sw", "off");
@@ -99,17 +99,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
     btnMuteActive.onclick = function () {
 
-        chrome.tabs.query(queryActiveOptions, ([tab]) => {
-            if (chrome.runtime.lastError)
+        chrome.tabs.query(queryActiveOptions, async ([tab]) => {
+            if (chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError);
+                return;
+            }
+
+            if (!tab) {
+                console.warn('No active tab found when toggling mute state');
+                return;
+            }
+
+            if (!tab.mutedInfo) {
+                console.warn('Muted info is unavailable for the active tab');
+                return;
+            }
 
             console.log(tab.mutedInfo);
             let activeMute = !tab.mutedInfo.muted;
-            chrome.tabs.update(tab.id, { muted: activeMute });
-            if (activeMute)
-                btnMuteActive.setAttribute("sw", "off");
-            else
-                btnMuteActive.setAttribute("sw", "on");
+            try {
+                await chrome.tabs.update(tab.id, { muted: activeMute });
+                if (activeMute)
+                    btnMuteActive.setAttribute("sw", "off");
+                else
+                    btnMuteActive.setAttribute("sw", "on");
+            } catch (error) {
+                console.error('Failed to toggle mute state for active tab:', error);
+            }
         });
     }
 
@@ -117,19 +133,36 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-function muteAll(mute) {
+async function muteAll(mute) {
 
     if (mute)
         btnMuteActive.setAttribute("sw", "off");
     else
         btnMuteActive.setAttribute("sw", "on");
 
-    chrome.windows.getAll({ populate: true }, function (windows) {
-        windows.forEach(function (window) {
-            window.tabs.forEach(function (tab) {
-                chrome.tabs.update(tab.id, { muted: mute });
-            });
-        });
-    });
+    try {
+        const windows = await chrome.windows.getAll({ populate: true });
+        
+        if (!windows) {
+            console.warn('No windows found');
+            return;
+        }
+        
+        for (const window of windows) {
+            if (!window.tabs) {
+                continue;
+            }
+            
+            for (const tab of window.tabs) {
+                try {
+                    await chrome.tabs.update(tab.id, { muted: mute });
+                } catch (error) {
+                    console.warn('Failed to update tab mute state:', tab.id, error);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('muteAll error in popup:', error);
+    }
 }
 
