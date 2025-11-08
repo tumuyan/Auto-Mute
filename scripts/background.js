@@ -1,5 +1,7 @@
 // 正在播放声音的标签
 var tabNow = -1;
+// 前一个播放声音的标签（用于标签页关闭时回退）
+var tabPrevious = -1;
 // 前台标签
 var tabActive = -1;
 var sw_on = true;
@@ -20,13 +22,20 @@ async function initialize() {
         options.autoMute = sw_on;
         await chrome.storage.local.set(options);
         
-        // 从storage恢复tabNow和tabActive状态（确保是数值类型）
+        // 从storage恢复tabNow、tabPrevious和tabActive状态（确保是数值类型）
         if (options.tabNow !== undefined && typeof options.tabNow === 'number') {
             tabNow = options.tabNow;
+        }
+        if (options.tabPrevious !== undefined && typeof options.tabPrevious === 'number') {
+            tabPrevious = options.tabPrevious;
         }
         if (options.tabActive !== undefined && typeof options.tabActive === 'number') {
             tabActive = options.tabActive;
         }
+
+        options.tabNow = tabNow;
+        options.tabPrevious = tabPrevious;
+        options.tabActive = tabActive;
         
         isInitialized = true;
         console.log('Extension initialized:', options);
@@ -66,12 +75,14 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
                         const tab = tabs[0];
                         tabNow = tab.id;
                         tabActive = tab.id;
+                        tabPrevious = -1;
                         options.tabNow = tabNow;
                         options.tabActive = tabActive;
+                        options.tabPrevious = tabPrevious;
                         await chrome.tabs.update(tab.id, { muted: false });
                         
                         // 持久化状态
-                        await chrome.storage.local.set({ tabNow: tabNow, tabActive: tabActive });
+                        await chrome.storage.local.set({ tabNow: tabNow, tabActive: tabActive, tabPrevious: tabPrevious });
                     }
                 } catch (error) {
                     console.error('Error in autoMute change handler:', error);
@@ -123,16 +134,21 @@ async function insertScript(activeInfo) {
                         // 验证之前的tab是否仍然存在
                         await chrome.tabs.get(tabNow);
                         await chrome.tabs.update(tabNow, { muted: true });
+                        // 保存当前的tabNow作为tabPrevious
+                        tabPrevious = tabNow;
                     } catch (error) {
                         console.warn('Previous tab no longer exists:', tabNow, error);
+                        // 如果之前的tab已经不存在，清空tabPrevious
+                        tabPrevious = -1;
                     }
                 }
                 tabNow = tabId;
                 options.tabNow = tabNow;
+                options.tabPrevious = tabPrevious;
                 options.tabActive = tabActive;
                 
                 // 持久化状态
-                await chrome.storage.local.set({ tabNow: tabNow, tabActive: tabActive });
+                await chrome.storage.local.set({ tabNow: tabNow, tabPrevious: tabPrevious, tabActive: tabActive });
             }
         } else {
             // 持久化tabActive状态
@@ -207,19 +223,88 @@ chrome.tabs.onUpdated.addListener(async function (id, info, tab) {
                     // 验证之前的tab是否仍然存在
                     await chrome.tabs.get(tabNow);
                     await chrome.tabs.update(tabNow, { muted: true });
+                    tabPrevious = tabNow;
                 } catch (error) {
                     console.warn('Previous tab no longer exists in onUpdated:', tabNow, error);
+                    tabPrevious = -1;
                 }
             }
             
             tabNow = tabActive;
             options.tabNow = tabNow;
+            options.tabPrevious = tabPrevious;
             
             // 持久化状态
-            await chrome.storage.local.set({ tabNow: tabNow });
+            await chrome.storage.local.set({ tabNow: tabNow, tabPrevious: tabPrevious });
         }
     } catch (error) {
         console.error('Error in onUpdated listener:', error);
+    }
+});
+
+chrome.tabs.onRemoved.addListener(async function (tabId) {
+    await ensureInitialized();
+
+    console.log('Tab removed:', tabId, 'tabNow:', tabNow, 'tabPrevious:', tabPrevious);
+
+    let stateChanged = false;
+
+    if (tabId === tabPrevious) {
+        console.log('Removed tab was tabPrevious, clearing it');
+        tabPrevious = -1;
+        options.tabPrevious = tabPrevious;
+        stateChanged = true;
+    }
+
+    if (tabId !== tabNow) {
+        if (stateChanged) {
+            try {
+                await chrome.storage.local.set({ tabPrevious: tabPrevious });
+            } catch (error) {
+                console.error('Failed to persist tabPrevious on removal:', error);
+            }
+        }
+        return;
+    }
+
+    console.log('Removed tab was tabNow, attempting to unmute tabPrevious:', tabPrevious);
+
+    tabNow = -1;
+    options.tabNow = tabNow;
+    stateChanged = true;
+
+    if (!sw_on) {
+        try {
+            await chrome.storage.local.set({ tabNow: tabNow, tabPrevious: tabPrevious });
+        } catch (error) {
+            console.error('Failed to persist state when auto mute disabled on removal:', error);
+        }
+        return;
+    }
+
+    const fallbackTabId = tabPrevious;
+
+    if (fallbackTabId > 0) {
+        try {
+            await chrome.tabs.get(fallbackTabId);
+            await chrome.tabs.update(fallbackTabId, { muted: false });
+            tabNow = fallbackTabId;
+            options.tabNow = tabNow;
+            tabPrevious = -1;
+            options.tabPrevious = tabPrevious;
+            await chrome.storage.local.set({ tabNow: tabNow, tabPrevious: tabPrevious });
+            return;
+        } catch (error) {
+            console.warn('Fallback tab no longer exists when removing current tab:', fallbackTabId, error);
+            tabPrevious = -1;
+            options.tabPrevious = tabPrevious;
+        }
+    }
+
+    try {
+        await chrome.storage.local.set({ tabNow: tabNow, tabPrevious: tabPrevious });
+    } catch (error) {
+        console.error('Failed to persist state after removal:', error);
     }
 });
 
