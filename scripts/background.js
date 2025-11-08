@@ -166,6 +166,29 @@ chrome.tabs.onActivated.addListener(async function (tab) {
     }
 });
 
+chrome.windows.onFocusChanged.addListener(async function (windowId) {
+    await ensureInitialized();
+
+    if (!sw_on) {
+        return;
+    }
+
+    if (windowId === chrome.windows.WINDOW_ID_NONE) {
+        return;
+    }
+
+    try {
+        const tabs = await chrome.tabs.query({ active: true, windowId: windowId });
+        if (!tabs || tabs.length === 0) {
+            return;
+        }
+
+        await insertScript({ tabId: tabs[0].id, windowId: windowId });
+    } catch (error) {
+        console.error('Error handling onFocusChanged event:', error);
+    }
+});
+
 
 // 如果智能跳过，需要检查前台标签内容更新时自动发声; 否则切换标签页时已经处理
 chrome.tabs.onUpdated.addListener(async function (id, info, tab) {
